@@ -8,10 +8,10 @@ using System.Text;
 using System.Threading;
 using UnityEngine.Networking;
 public class Cannon {
-    public int size = 4;
-    public int bsize = 2;
-    public int num_p = 4;
-    public int root_p = 2;
+    public const int size = 4;
+    public const int bsize = 2;
+    public const int num_p = 4;
+    public const int root_p = 2;
     public int[,] ShiftLeft(int[,] matrix, int i)
     {
         int[,] newM = (int[,])matrix.Clone();
@@ -58,7 +58,7 @@ public class Cannon {
 
     public int[,] stringToMatrix(string s, int size)
     {
-        Debug.Log(s);
+        //Debug.Log(s);
         string[] elements = s.Split('$');
         int[,] m = new int[size, size];
         for (int i = 0; i < size; i++)

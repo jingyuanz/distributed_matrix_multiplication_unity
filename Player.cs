@@ -19,8 +19,6 @@ public class Player : NetworkBehaviour {
 	public int score;
 	public int hp;
     public Cannon cannon;
-    [SyncVar]
-    public string myA, myB, myC;
 	// Use this for initialization
 	void Start () {
 		speed = 2;
@@ -43,49 +41,65 @@ public class Player : NetworkBehaviour {
 	}
 
 
-    //[ClientRpc]
-    public void updateMatrices(int i, int j, int k, string sA, string sB, string sC)
+    [ClientRpc]
+    public void RpcUpdateMatrices(int i, int j, int k, string sA, string sB, string sC)
     {
         cannon = new Cannon();
-        Debug.Log("in rpc");
-        if (!isServer)
+        //Debug.Log("in rpc");
+        if (!isLocalPlayer)
         {
             //CmdSetMatrices("aa", "bb", "cc");
             return;
         }
-        Debug.Log("server");
-        Debug.Log(sA);
-        Debug.Log(sB);
-        Debug.Log(sC);
-        int[,] mA = cannon.stringToMatrix(sA, 4);
-        int[,] mB = cannon.stringToMatrix(sB, cannon.size);
-        int[,] mC = cannon.stringToMatrix(sC, cannon.size);
-        var m = (i + j + k) % cannon.root_p;
+        //Debug.Log("local plyaer");
+        //Debug.Log(sA);
+        //Debug.Log(sB);
+        //Debug.Log(sC);
+        int[,] mA = cannon.stringToMatrix(sA, Cannon.size);
+        int[,] mB = cannon.stringToMatrix(sB, Cannon.size);
+        int[,] mC = cannon.stringToMatrix(sC, Cannon.size);
+        var m = (i + j + k) % Cannon.root_p;
         int[,] sliceA = cannon.sliceMatrix(mA, i, m);
         int[,] sliceB = cannon.sliceMatrix(mB, m, j);
-        int[,] product = cannon.MatrixProduct(sliceA, sliceB, cannon.bsize);
+        //Debug.Log()
+        int[,] product = cannon.MatrixProduct(sliceA, sliceB, Cannon.bsize);
+
         cannon.addSlice(mC, product, i, j);
         mA = cannon.ShiftLeft(mA, i);
         mB = cannon.ShiftUp(mB, j);
         //string[] results = { newSA, newSB, newSC };
         //return results;
         //return cannon.matrixToString(mA, cannon.size);
-        setMatrices(cannon.matrixToString(mA, cannon.size), cannon.matrixToString(mB, cannon.size), cannon.matrixToString(mC, cannon.size));
+        //myA = cannon.matrixToString(mA, cannon.size);
+        //myB = cannon.matrixToString(mB, cannon.size);
+
+        //myC = cannon.matrixToString(mC, cannon.size);
+
+        CmdSetMatrices(cannon.matrixToString(mA, Cannon.size), cannon.matrixToString(mB, Cannon.size), cannon.matrixToString(mC, Cannon.size));
+
     }
 
-    //[Command]
-    public void setMatrices(string A, string B, string C)
+    [Command]
+    public void CmdSetMatrices(string A, string B, string C)
     {
-        //if (isServer)
-        //{
-        //    Debug.Log(1232132132131);
-        //}
-        //else {
-        //    Debug.Log("cmd");
-        //}
-        myA = A;
-        myB = B;
-        myC = C;
+        Server svr = GameObject.Find("Server").GetComponent<Server>();
+        svr.sA = A;
+        svr.sB = B;
+        svr.sC = C;
+        svr.waitingForResult = false;
+    }
+
+
+    [ClientRpc]
+    public void RpcFake(int i)
+    {
+        if(isLocalPlayer) CmdFake(i + 10);
+    }
+
+    [Command]
+    public void CmdFake(int i)
+    {
+        GameObject.Find("Server").GetComponent<Server>().FakeResult(i);
     }
 
 

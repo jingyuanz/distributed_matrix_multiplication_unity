@@ -22,7 +22,10 @@ public class Spawn : NetworkBehaviour {
     public NetworkPlayer[] connections;
     
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
+        Debug.Log("zz");
+
 		Vector3 v = new Vector3 (0, 0, 1);
 
         //filling in the 2D array that decides map generation
